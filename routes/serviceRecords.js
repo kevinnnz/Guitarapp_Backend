@@ -46,7 +46,6 @@ router.post('/:UserId', function(req, res){
                     "message" : "Insert successful!"
                 });
             }
-            
         });
 
         client.close();
