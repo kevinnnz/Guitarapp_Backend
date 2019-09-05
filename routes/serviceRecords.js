@@ -4,6 +4,16 @@ const router = express.Router();
 // service record models
 var ServiceRecord = require('../models/serviceRecord');
 
+// connection db
+var MongoClient = require('mongodb').MongoClient;
+var url = "mongodb://localhost:27017/";
+
+// Midware
+router.use(function timeLog(req, res, next){
+    console.log('Time: ', Date.now());
+    next();
+});
+
 // create new service record
 router.post('/:UserId', function(req, res){
     const body = req.body;
@@ -13,7 +23,7 @@ router.post('/:UserId', function(req, res){
         body.date, body.techName, body.techCompany, body.workDone, body.notes
     );
 
-    console.log(guitar);
+    console.log(serviceRecord);
 
     MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, client){
         if (err) {
@@ -25,21 +35,21 @@ router.post('/:UserId', function(req, res){
 
         // connecting to MongoDb
         var dbo = client.db("gearapp");
-        dbo.collection("guitars").insertOne({ guitarId, $push: { serviceRecords: serviceRecord }}, function(err, result){
+        dbo.collection("guitars").updateOne({ _id: guitarId }, { $push: { serviceRecords: serviceRecord }}, function(err, result){
             if(err) {
                 res.status(500).json({
                     "code":500,
-                    "message":"Something went wrong, please try again."
-                })
+                    "message" : "Something went wrong, please try again."
+                });
+            } else {
+                res.status(200).json({
+                    "message" : "Insert successful!"
+                });
             }
-
-            res.status(200).json({
-                message: "Insert Sucessful",
-                serviceRecord: serviceRecord,
-            });
-
-            client.close();
+            
         });
+
+        client.close();
     });
 });
 

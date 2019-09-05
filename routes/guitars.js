@@ -27,7 +27,7 @@ router.get('/:UserId', function(req, res){
         var dbo = client.db("gearapp");
         dbo.collection("guitars").find({ owner: `${ userid }`}).toArray(function(err, result){
             if (err) {
-                res.send(424).json({
+                res.status(424).json({
                     "code": 424,
                     "message":"We could not create a new guitar at this time, please try again."
                 });
@@ -66,10 +66,11 @@ router.post('/:UserId', function(req, res){
                 res.status(500).json({
                     "code":500,
                     "message":"Something went wrong, please try again."
-                })
+                });
+            } else {
+                res.status(200).json(result);
             }
-
-            res.status(200).json(result);
+            
             client.close();
         });
     });
