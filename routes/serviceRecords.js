@@ -35,7 +35,7 @@ router.post('/:UserId', function(req, res){
 
         // connecting to MongoDb
         var dbo = client.db("gearapp");
-        dbo.collection("guitars").updateOne({ _id: guitarId }, { $push: { serviceRecords: serviceRecord }}, function(err, result){
+        dbo.collection("guitars").updateOne({ _id: ObjectId(guitarId) }, { $push: { serviceRecords: serviceRecord }}, function(err, result){
             if(err) {
                 res.status(500).json({
                     "code":500,

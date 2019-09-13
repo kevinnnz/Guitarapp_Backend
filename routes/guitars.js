@@ -29,10 +29,10 @@ router.get('/:UserId', function(req, res){
             if (err) {
                 res.status(424).json({
                     "code": 424,
-                    "message":"We could not create a new guitar at this time, please try again."
+                    "message": "No guitars found."
                 });
             } else {
-                res.status(200).json({ "guitars":result });
+                res.status(200).json(result);
             }
         });
 
@@ -48,8 +48,6 @@ router.post('/:UserId', function(req, res){
     var guitar = new Guitar(
         body.owner, body.guitarMake, body.guitarModel, body.guitarSerial, body.guitarColour, []
     );
-
-    console.log(guitar);
 
     MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, client){
         if (err) {
@@ -75,6 +73,5 @@ router.post('/:UserId', function(req, res){
         });
     });
 });
-
 
 module.exports = router;
