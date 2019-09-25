@@ -48,6 +48,7 @@ router.post('/register', function(req, res){
                         "password" : hash
                     }, function(err, result){
                         if(err) {
+                            console.log(err);
                             return res.status(500).json({
                                 "message":"User could not be created. Please try again."
                             });
@@ -57,8 +58,6 @@ router.post('/register', function(req, res){
                     });
                 }
             });
-
-            client.close();
         });
     }); 
 });
