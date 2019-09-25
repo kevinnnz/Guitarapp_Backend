@@ -46,9 +46,10 @@ router.post('/:UserId', function(req, res){
     const body = req.body;
     // construct new guitar for db
     var guitar = new Guitar(
-        body.owner, body.guitarMake, body.guitarModel, body.guitarSerial, body.guitarColour, []
+        body.owner, body.guitarMake, body.guitarModel, body.guitarYear, body.guitarSerial, body.guitarColour, []
     );
 
+    console.log(guitar);
     MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, client){
         if (err) {
             res.status(500).json({

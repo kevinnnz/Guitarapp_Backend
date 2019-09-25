@@ -8,6 +8,8 @@ var ServiceRecord = require('../models/serviceRecord');
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017/";
 
+var ObjectId = require('mongodb').ObjectID;
+
 // Midware
 router.use(function timeLog(req, res, next){
     console.log('Time: ', Date.now());
@@ -18,6 +20,7 @@ router.use(function timeLog(req, res, next){
 router.post('/:UserId', function(req, res){
     const body = req.body;
     const guitarId = req.body.guitarId;
+    console.log(guitarId);
     // construct new service record for db
     var serviceRecord = new ServiceRecord(
         body.date, body.techName, body.techCompany, body.workDone, body.notes
@@ -51,9 +54,6 @@ router.post('/:UserId', function(req, res){
         client.close();
     });
 });
-
-
-// update service record
 
 
 // export routes
