@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const verify = require('./verifyToken');
+
 var Guitar = require('../models/guitar');
 
 // connection db
@@ -45,8 +47,9 @@ router.get('/:UserId', function(req, res){
 router.post('/:UserId', function(req, res){
     const body = req.body;
     // construct new guitar for db
+    console.log(req.params.UserId);
     var guitar = new Guitar(
-        body.owner, body.guitarMake, body.guitarModel, body.guitarYear, body.guitarSerial, body.guitarColour, []
+        req.params.UserId, body.guitarMake, body.guitarModel, body.guitarYear, body.guitarSerial, body.guitarColour, []
     );
 
     console.log(guitar);

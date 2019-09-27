@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const verify = require('./verifyToken');
 // service record models
 var ServiceRecord = require('../models/serviceRecord');
 

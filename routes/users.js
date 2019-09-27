@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const verify = require('./verifyToken');
+
 // connection db
 const MongoClient = require('mongodb').MongoClient;
 const url = "mongodb://localhost:27017/";
@@ -83,11 +85,21 @@ router.post('/login', function(req, res) {
             }
 
             // generate token
-            const token = jwt.sign({_id: user._id}, "privatekey");
-            res.header('auth-token', token).send(token);
+            const token = jwt.sign({_id: user._id, name: user.name, email:user.email}, "privatekey");
+            return res.status(200).json(token);
         });
 
     });
+});    
+
+router.get('/token', verify, function(req, res) {
+    let user = { 
+        _id: req.user._id,
+        email: req.user.email,
+        name: req.user.name
+    }
+    
+    return res.status(200).json(user);
 });
 
 module.exports = router;
