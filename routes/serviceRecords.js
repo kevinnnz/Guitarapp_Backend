@@ -1,61 +1,42 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-const verify = require('./verifyToken');
 // service record models
-var ServiceRecord = require('../models/serviceRecord');
+const ServiceRecord = require('../models/serviceRecord')
 
-// connection db
-var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/";
-
-var ObjectId = require('mongodb').ObjectID;
+const ObjectId = require('mongodb').ObjectID
 
 // Midware
+const { isAuthenticated, decodeFireBaseToken } = require('../middleware/validator')
+
 router.use(function timeLog(req, res, next){
-    console.log('Time: ', Date.now());
-    next();
-});
+    console.log('Time: ', Date.now())
+    next()
+})
 
 // create new service record
-router.post('/:UserId', function(req, res){
-    const body = req.body;
-    const guitarId = req.body.guitarId;
-    console.log(guitarId);
+router.post('/:UserId', decodeFireBaseToken, isAuthenticated, function(req, res){
+    const body = req.body
+    const guitarId = req.body.guitarId
     // construct new service record for db
-    var serviceRecord = new ServiceRecord(
+    const serviceRecord = new ServiceRecord(
         body.date, body.techName, body.techCompany, body.workDone, body.notes
-    );
-
-    console.log(serviceRecord);
-
-    MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, client){
-        if (err) {
+    )
+    
+    db.collection("guitars").updateOne({ _id: ObjectId(guitarId) }, { $push: { serviceRecords: serviceRecord }}, function(err, result){
+        if(err) {
             res.status(500).json({
                 "code":500,
-                "message":"Something went wrong, please try again."
-            });
+                "message" : "Something went wrong, please try again."
+            })
+        } else {
+            res.status(200).json({
+                "message" : "Service record created."
+            })
         }
-
-        // connecting to MongoDb
-        var dbo = client.db("gearapp");
-        dbo.collection("guitars").updateOne({ _id: ObjectId(guitarId) }, { $push: { serviceRecords: serviceRecord }}, function(err, result){
-            if(err) {
-                res.status(500).json({
-                    "code":500,
-                    "message" : "Something went wrong, please try again."
-                });
-            } else {
-                res.status(200).json({
-                    "message" : "Insert successful!"
-                });
-            }
-        });
-
-        client.close();
-    });
-});
+    })
+})
 
 
 // export routes
-module.exports = router;
+module.exports = router

@@ -1,81 +1,48 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-const verify = require('./verifyToken');
-
-var Guitar = require('../models/guitar');
-
-// connection db
-var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/";
+// guitar model
+const Guitar = require('../models/guitar')
 
 // Midware
+const { isAuthenticated, decodeFireBaseToken } = require('../middleware/validator')
+
 router.use(function timeLog(req, res, next){
-    console.log('Time: ', Date.now());
-    next();
-});
+    console.log('Time: ', Date.now())
+    next()
+})
 
 // getting guitars from database
-router.get('/:UserId', function(req, res){
-    let userid = req.params.UserId;
-    MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, client){
+router.get('/:UserId', decodeFireBaseToken, isAuthenticated, function(req, res){
+    let userid = req.params.UserId
+    db.collection("guitars").find({ owner: `${ userid }`}).toArray(function(err, result){
         if (err) {
-            res.send(500).json({
-                "code":500,
-                "message":"Something went wrong, please try again."
-            });
+            res.status(424).json({
+                "code": 424,
+                "message": "No guitars found."
+            })
+        } else {
+            res.status(200).json(result)
         }
-
-        var dbo = client.db("gearapp");
-        dbo.collection("guitars").find({ owner: `${ userid }`}).toArray(function(err, result){
-            if (err) {
-                res.status(424).json({
-                    "code": 424,
-                    "message": "No guitars found."
-                });
-            } else {
-                res.status(200).json(result);
-            }
-        });
-
-        // closing the connection
-        client.close();
-    });
-});
+    })
+})
 
 // create new guitar
-router.post('/:UserId', function(req, res){
-    const body = req.body;
-    // construct new guitar for db
-    console.log(req.params.UserId);
-    var guitar = new Guitar(
+router.post('/:UserId', decodeFireBaseToken, isAuthenticated, (req, res) => {
+    const body = req.body
+    const guitar = new Guitar(
         req.params.UserId, body.guitarMake, body.guitarModel, body.guitarYear, body.guitarSerial, body.guitarColour, []
-    );
-
-    console.log(guitar);
-    MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, client){
-        if (err) {
+    )
+    db.collection("guitars").insertOne(guitar, function(err, result){
+        if(err) {
             res.status(500).json({
                 "code":500,
                 "message":"Something went wrong, please try again."
-            });
+            })
+        } else {
+            res.status(200).json(result)
         }
+    })
+})
 
-        // connecting to MongoDb
-        var dbo = client.db("gearapp");
-        dbo.collection("guitars").insertOne(guitar, function(err, result){
-            if(err) {
-                res.status(500).json({
-                    "code":500,
-                    "message":"Something went wrong, please try again."
-                });
-            } else {
-                res.status(200).json(result);
-            }
-            
-            client.close();
-        });
-    });
-});
-
-module.exports = router;
+module.exports = router

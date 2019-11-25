@@ -1,29 +1,38 @@
-const express = require('express');
-const app = express();
-const cors = require('cors');
-const bodyParser = require('body-parser');
+const express = require('express')
+const app = express()
+const cors = require('cors')
+const bodyParser = require('body-parser')
 
-const guitars = require('./routes/guitars');
-const serviceRecords = require('./routes/serviceRecords');
-const users = require('./routes/users');
+const MongoClient = require('mongodb').MongoClient
 
-app.use(cors());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.json());
+const guitars = require('./routes/guitars')
+const serviceRecords = require('./routes/serviceRecords')
 
-const port = 8080;
+app.use(cors())
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(express.json())
+
+const port = 8080
+const url = "mongodb://localhost:27017/"
+global.db = ""
 
 // Routes
-app.use('/api/guitar', guitars);
-app.use('/api/service', serviceRecords);
-app.use('/api/user', users);
+app.use('/api/guitar', guitars)
+app.use('/api/service', serviceRecords)
 
 app.use(function(res, req, next){
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+    next()
+})
 
-app.listen(port, function() {
-    console.log("Listening on port " + port);
-});
+
+MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, database) {
+    // NOTE: implement an email service to email me if it goes down..
+    if(err) console.log(err)
+    db = database.db('gear')
+
+    app.listen(port, function() {
+        console.log("Listening on port " + port)
+    })
+})
